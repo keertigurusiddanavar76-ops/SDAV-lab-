@@ -1,0 +1,830 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Discrete Probability Distributions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@600;700&display=swap">
+<style>
+/* Layout concept: sticky top bar with four routes; each module is a stack of lab panels (parameters, statistics, PMF, CDF) with one shared bar chart style. */
+:root {
+  --bg: #F2F5F7;
+  --surface: #FFFFFF;
+  --surface-2: #E9EFF2;
+  --ink: #13242C;
+  --ink-2: #4A5D67;
+  --line: #D3DCE1;
+  --field-line: #8FA2AC;
+  --accent: #0B6E7A;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #D8EEF0;
+  --mark: #D9731A;
+  --bar: #BCC9D0;
+  --good: #1B7F4B;
+  --good-soft: #DDF1E5;
+  --bad: #B3261E;
+  --bad-soft: #FBE4E2;
+  --display: 'Schibsted Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C1519; --surface: #131F25; --surface-2: #1B2B33; --ink: #E6EEF1; --ink-2: #9DB2BC;
+    --line: #26393F; --field-line: #4D6672; --accent: #4FC3CF; --accent-ink: #06262B; --accent-soft: #12383E;
+    --mark: #F0953F; --bar: #3B5360; --good: #5FD39A; --good-soft: #12341F; --bad: #FF8A80; --bad-soft: #3D1A18;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C1519; --surface: #131F25; --surface-2: #1B2B33; --ink: #E6EEF1; --ink-2: #9DB2BC;
+  --line: #26393F; --field-line: #4D6672; --accent: #4FC3CF; --accent-ink: #06262B; --accent-soft: #12383E;
+  --mark: #F0953F; --bar: #3B5360; --good: #5FD39A; --good-soft: #12341F; --bad: #FF8A80; --bad-soft: #3D1A18;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 15px; line-height: 1.55;
+}
+.wrap {
+  max-width: 960px; margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Header */
+.site {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
+  background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.site .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 24px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 0.98rem; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; }
+.brand svg { fill: var(--accent); flex: none; }
+.nav { display: flex; gap: 2px; overflow-x: auto; max-width: 100%; }
+.nav a { padding: 7px 12px; border-radius: 6px; color: var(--ink-2); font-weight: 500; text-decoration: none; white-space: nowrap; }
+.nav a:hover { background: var(--surface-2); color: var(--ink); }
+.nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+
+main { padding-block: 28px 56px; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 600; margin: 0 0 6px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.7rem, 4.5vw, 2.5rem); line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 10px; text-wrap: balance; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 1.1rem; letter-spacing: -0.01em; margin: 0 0 4px; }
+.lead { color: var(--ink-2); max-width: 62ch; margin: 0 0 22px; font-size: 1rem; }
+.mono { font-family: var(--mono); }
+
+/* Panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; min-width: 0; }
+.panel-lead { color: var(--ink-2); margin: 0 0 16px; max-width: 62ch; }
+.blocked { margin: 0; padding: 14px; border-radius: 8px; background: var(--surface-2); color: var(--ink-2); }
+
+/* Home cards */
+.cards { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.card { display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; min-width: 0; }
+.card:hover { border-color: var(--accent); }
+.card h3 { font-family: var(--display); font-size: 1.15rem; margin: 0; letter-spacing: -0.01em; }
+.card .notation { font-family: var(--mono); font-size: 0.82rem; color: var(--accent); }
+.card p { margin: 0; color: var(--ink-2); flex: 1; }
+.status { align-self: flex-start; font-size: 0.74rem; font-weight: 600; padding: 2px 9px; border-radius: 99px; background: var(--surface-2); color: var(--ink-2); }
+.status.ready { background: var(--good-soft); color: var(--good); }
+
+/* Fields */
+.fields { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .fields { grid-template-columns: 1fr 1fr; } }
+.lbl { display: block; font-weight: 600; font-size: 0.86rem; margin-bottom: 6px; }
+.lbl .sym { font-family: var(--mono); color: var(--accent); font-weight: 500; }
+input[type="number"] {
+  width: 100%; font-family: var(--mono); font-size: 1.1rem; padding: 10px 12px;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--field-line); border-radius: 8px;
+}
+input[type="number"][aria-invalid="true"] { border-color: var(--bad); background: var(--bad-soft); }
+.msg { font-size: 0.82rem; margin: 6px 0 0; color: var(--ink-2); min-height: 1.3em; }
+.msg.err { color: var(--bad); font-weight: 500; }
+
+.selected { display: flex; flex-wrap: wrap; gap: 10px 32px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.selected .item { min-width: 0; }
+.selected .k { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); }
+.selected .v { font-family: var(--mono); font-size: 1.2rem; font-weight: 500; }
+
+/* Stats */
+.stats { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.stats .stat:last-child { grid-column: 1 / -1; }
+@media (min-width: 760px) {
+  .stats { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .stats .stat:last-child { grid-column: auto; }
+}
+.stat { background: var(--surface-2); border-radius: 8px; padding: 14px; min-width: 0; }
+.stat .k { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; }
+.stat .v { font-family: var(--mono); font-size: 1.5rem; font-weight: 500; margin: 4px 0 8px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.stat .f { font-family: var(--mono); font-size: 0.74rem; overflow-wrap: anywhere; }
+.stat .s { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-2); overflow-wrap: anywhere; margin-top: 2px; }
+.checks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; font-size: 0.84rem; color: var(--ink-2); }
+.pill { display: inline-flex; gap: 6px; align-items: center; padding: 3px 11px; border-radius: 99px; font-family: var(--mono); font-size: 0.8rem; background: var(--good-soft); color: var(--good); }
+.pill.fail { background: var(--bad-soft); color: var(--bad); }
+
+/* PMF / CDF */
+.split { display: grid; gap: 20px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .split { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+.col { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.result .big { font-family: var(--mono); font-size: clamp(1.6rem, 6vw, 2.3rem); font-weight: 500; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.result .sub { font-family: var(--mono); color: var(--ink-2); font-size: 0.85rem; }
+.result .cap { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; }
+.math { font-family: var(--mono); font-size: 0.9rem; background: var(--surface-2); border-radius: 8px; padding: 12px 14px; overflow-x: auto; line-height: 2; min-width: 0; align-self: start; }
+.math .ml { white-space: nowrap; }
+.math .dim { color: var(--ink-2); }
+.math sup { font-size: 0.72em; line-height: 0; }
+.math .cap { font-family: var(--body); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); font-weight: 600; line-height: 1.4; margin-bottom: 4px; }
+.note { margin: 0; }
+.note .tag { display: inline-block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--accent); margin-right: 8px; }
+.two { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 520px) { .two { grid-template-columns: 1fr 1fr; } }
+.tile { background: var(--surface-2); border-radius: 8px; padding: 14px; min-width: 0; }
+.splitbar { height: 10px; border-radius: 5px; background: var(--bar); overflow: hidden; margin-top: 14px; }
+.splitbar i { display: block; height: 100%; background: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .splitbar i { transition: width 0.25s ease; } }
+.explain { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+
+/* Chart */
+.chart { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--line); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.82rem; color: var(--ink-2); margin-bottom: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.chart-host { width: 100%; min-height: 250px; }
+.chart-host svg { display: block; }
+.ax { fill: var(--ink-2); font: 11px var(--mono); }
+.grid-line { stroke: var(--line); stroke-width: 1; }
+.base-line { stroke: var(--field-line); stroke-width: 1; }
+.b-muted { fill: var(--bar); }
+.b-mark { fill: var(--mark); }
+.b-acc { fill: var(--accent); }
+.sw-muted { background: var(--bar); }
+.sw-mark { background: var(--mark); }
+.sw-acc { background: var(--accent); }
+</style>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="#home" data-route="home">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="14" width="3.4" height="7" rx="0.7"/><rect x="5.6" y="8" width="3.4" height="13" rx="0.7"/><rect x="10.2" y="2" width="3.4" height="19" rx="0.7"/><rect x="14.8" y="8" width="3.4" height="13" rx="0.7"/><rect x="19.4" y="14" width="2.2" height="7" rx="0.7"/></svg>
+      <span>Discrete Probability Distributions</span>
+    </a>
+    <nav class="nav" aria-label="Distributions">
+      <a href="#home" data-route="home">Home</a>
+      <a href="#binomial" data-route="binomial">Binomial</a>
+      <a href="#poisson" data-route="poisson">Poisson</a>
+      <a href="#geometric" data-route="geometric">Geometric</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- HOME -->
+  <section id="page-home">
+    <p class="eyebrow">AIML Laboratory · Undergraduate</p>
+    <h1>Discrete Probability Distributions</h1>
+    <p class="lead">Pick a distribution, set its parameters and see its statistics and probabilities update as you type. Each module has the same layout, so you can compare them side by side.</p>
+    <div class="cards">
+      <a class="card" href="#binomial" data-route="binomial">
+        <span class="status ready">Ready</span>
+        <h3>Binomial</h3>
+        <span class="notation">X ~ Binomial(n, p)</span>
+        <p>Counts the successes in n independent trials, each with success probability p.</p>
+      </a>
+      <a class="card" href="#poisson" data-route="poisson">
+        <span class="status ready">Ready</span>
+        <h3>Poisson</h3>
+        <span class="notation">X ~ Poisson(λ)</span>
+        <p>Counts events in a fixed interval when they occur at an average rate λ.</p>
+      </a>
+      <a class="card" href="#geometric" data-route="geometric">
+        <span class="status ready">Ready</span>
+        <h3>Geometric</h3>
+        <span class="notation">X ~ Geometric(p)</span>
+        <p>Counts the trials needed to get the first success.</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- BINOMIAL -->
+  <section id="page-binomial" hidden>
+    <p class="eyebrow">Module</p>
+    <h1>Binomial Distribution</h1>
+    <p class="lead">X counts the successes in n independent trials. Every trial succeeds with the same probability p.</p>
+
+    <div class="stack">
+      <div class="panel">
+        <h2>Parameters</h2>
+        <p class="panel-lead">Change n or p and every result below updates.</p>
+        <div class="fields">
+          <div>
+            <label class="lbl" for="n">Number of trials, <span class="sym">n</span></label>
+            <input id="n" type="number" inputmode="numeric" step="1" min="1" value="20" autocomplete="off">
+            <p class="msg" id="n-msg"></p>
+          </div>
+          <div>
+            <label class="lbl" for="p">Probability of success, <span class="sym">p</span></label>
+            <input id="p" type="number" inputmode="decimal" step="any" min="0" max="1" value="0.35" autocomplete="off">
+            <p class="msg" id="p-msg"></p>
+          </div>
+        </div>
+        <div class="selected" aria-live="polite">
+          <div class="item"><div class="k">Trials</div><div class="v" id="sel-n">20</div></div>
+          <div class="item"><div class="k">Success probability</div><div class="v" id="sel-p">0.35</div></div>
+          <div class="item"><div class="k">Distribution</div><div class="v" id="sel-d">X ~ Binomial(20, 0.35)</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Summary statistics</h2>
+        <p class="blocked" data-blocked>Enter a valid n and p above to see this section.</p>
+        <div data-body>
+          <div class="stats" id="stats"></div>
+          <div class="checks" id="checks" hidden></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>PMF: probability of exactly k successes</h2>
+        <p class="panel-lead">The probability mass function gives P(X = k) for one value of k.</p>
+        <p class="blocked" data-blocked>Enter a valid n and p above to see this section.</p>
+        <div data-body>
+          <div class="split">
+            <div class="col">
+              <div>
+                <label class="lbl" for="k-pmf">Number of successes, <span class="sym">k</span></label>
+                <input id="k-pmf" type="number" inputmode="numeric" step="1" min="0" value="7" autocomplete="off">
+                <p class="msg" id="kp-msg"></p>
+              </div>
+              <div class="result" id="pmf-res">
+                <div class="cap" id="pmf-cap">P(X = 7)</div>
+                <div class="big" id="pmf-val">0</div>
+                <div class="sub" id="pmf-pct"></div>
+              </div>
+            </div>
+            <div class="math" id="pmf-math"></div>
+          </div>
+          <p class="note explain" id="pmf-explain"></p>
+          <div class="chart">
+            <div class="legend" id="pmf-legend"></div>
+            <div class="chart-host" id="chart-pmf"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>CDF: probability of k or fewer successes</h2>
+        <p class="panel-lead">The cumulative distribution function adds up the PMF from 0 to k.</p>
+        <p class="blocked" data-blocked>Enter a valid n and p above to see this section.</p>
+        <div data-body>
+          <div class="split">
+            <div class="col">
+              <div>
+                <label class="lbl" for="k-cdf">Number of successes, <span class="sym">k</span></label>
+                <input id="k-cdf" type="number" inputmode="numeric" step="1" min="0" value="7" autocomplete="off">
+                <p class="msg" id="kc-msg"></p>
+              </div>
+            </div>
+            <div id="cdf-res">
+              <div class="two">
+                <div class="tile result">
+                  <div class="cap" id="cdf-cap">P(X ≤ 7)</div>
+                  <div class="big" id="cdf-val">0</div>
+                  <div class="sub" id="cdf-pct"></div>
+                </div>
+                <div class="tile result">
+                  <div class="cap" id="up-cap">P(X &gt; 7)</div>
+                  <div class="big" id="up-val">0</div>
+                  <div class="sub" id="up-pct"></div>
+                </div>
+              </div>
+              <div class="splitbar" aria-hidden="true"><i id="cdf-bar" style="width:0%"></i></div>
+              <div class="math" id="cdf-math" style="margin-top:14px"></div>
+            </div>
+          </div>
+          <div class="explain note" id="cdf-explain">
+            <p class="note"><span class="tag">Meaning</span>P(X ≤ k) means the probability of getting k or fewer successes.</p>
+            <p class="note"><span class="tag">Meaning</span>P(X &gt; k) is the probability of getting more than k successes.</p>
+          </div>
+          <div class="chart">
+            <div class="legend" id="cdf-legend"></div>
+            <div class="chart-host" id="chart-cdf"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POISSON and GEOMETRIC pages are built in the script from one shared template -->
+  <section id="page-poisson" hidden></section>
+  <section id="page-geometric" hidden></section>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var MAXN = 1000;
+  var pages = ['home', 'binomial', 'poisson', 'geometric'];
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- Routing ---------- */
+  function show(name) {
+    if (pages.indexOf(name) < 0) name = 'home';
+    pages.forEach(function (p) { $('page-' + p).hidden = (p !== name); });
+    Array.prototype.forEach.call(document.querySelectorAll('.nav a'), function (a) {
+      if (a.getAttribute('data-route') === name) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0, 0);
+    requestAnimationFrame(renderCharts);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-route]'), function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var name = a.getAttribute('data-route');
+      show(name);
+      try { history.replaceState(null, '', '#' + name); } catch (err) { /* sandboxed frame */ }
+    });
+  });
+  window.addEventListener('hashchange', function () { show(location.hash.replace('#', '')); });
+
+  /* ---------- Math ---------- */
+  var lf = [0];
+  function lnFact(m) { for (var i = lf.length; i <= m; i++) lf[i] = lf[i - 1] + Math.log(i); return lf[m]; }
+  function pmfAt(n, p, k) {
+    if (p === 0) return k === 0 ? 1 : 0;
+    if (p === 1) return k === n ? 1 : 0;
+    return Math.exp(lnFact(n) - lnFact(k) - lnFact(n - k) + k * Math.log(p) + (n - k) * Math.log1p(-p));
+  }
+  function choose(n, k) {
+    k = Math.min(k, n - k);
+    var r = 1n;
+    for (var i = 1; i <= k; i++) r = r * BigInt(n - k + i) / BigInt(i);
+    return r;
+  }
+
+  /* ---------- Formatting ---------- */
+  function fmt(x, d) { return String(parseFloat(x.toFixed(d === undefined ? 4 : d))); }
+  function fmtProb(x) { if (x === 0) return '0'; return x < 1e-6 ? x.toExponential(3) : x.toFixed(6); }
+  function fmtPct(x) {
+    var v = x * 100;
+    if (v === 0) return '0%';
+    if (v < 0.01) return v.toExponential(2) + '%';
+    return v.toFixed(2) + '%';
+  }
+  function fmtBig(r) {
+    var s = r.toString();
+    if (s.length <= 15) return s.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return s.charAt(0) + '.' + s.slice(1, 4) + ' × 10<sup>' + (s.length - 1) + '</sup>';
+  }
+
+  /* ---------- Validation ---------- */
+  function parseN(v) {
+    if (v.trim() === '') return { err: 'Enter the number of trials n.' };
+    var x = Number(v);
+    if (!isFinite(x) || x % 1 !== 0 || x < 1) return { err: 'n must be a positive whole number, such as 20.' };
+    if (x > MAXN) return { err: 'Use n up to ' + MAXN + ' so the chart stays readable.' };
+    return { val: x };
+  }
+  function parseP(v) {
+    if (v.trim() === '') return { err: 'Enter the probability p.' };
+    var x = Number(v);
+    if (!isFinite(x) || x < 0 || x > 1) return { err: 'p must be a number between 0 and 1.' };
+    return { val: x };
+  }
+  function parseK(v, n) {
+    if (v.trim() === '') return { err: 'Enter k.' };
+    var x = Number(v);
+    if (!isFinite(x) || x % 1 !== 0) return { err: 'k must be a whole number.' };
+    if (x < 0 || x > n) return { err: 'k must be between 0 and ' + n + '.' };
+    return { val: x };
+  }
+  function setMsg(id, inputId, err, hint) {
+    var m = $(id);
+    m.textContent = err || hint;
+    m.className = 'msg' + (err ? ' err' : '');
+    $(inputId).setAttribute('aria-invalid', err ? 'true' : 'false');
+  }
+
+  /* ---------- Chart ---------- */
+  var cur = { ok: false, n: 0, p: 0, kp: null, kc: null };
+  var MODS = null;
+
+  function drawChart(host, lo, hi, fn, mode, k, label) {
+    var W = host.clientWidth;
+    if (!W) return;
+    var H = 250, ml = 48, mr = 8, mt = 10, mb = 42;
+    var iw = W - ml - mr, ih = H - mt - mb, i;
+    var pm = [], mx = 0;
+    for (i = lo; i <= hi; i++) { pm[i] = fn(i); if (pm[i] > mx) mx = pm[i]; }
+    var steps = [0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.25, 0.5, 1], st = 1;
+    for (i = 0; i < steps.length; i++) { if (mx / steps[i] <= 5) { st = steps[i]; break; } }
+    var ymax = Math.ceil(mx / st - 1e-9) * st;
+    if (ymax <= 0) ymax = st;
+    var y = function (v) { return mt + ih - (v / ymax) * ih; };
+    var s = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + label + '">';
+    for (var t = 0; t <= ymax + 1e-9; t += st) {
+      s += '<line class="grid-line" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + y(t) + '" y2="' + y(t) + '"/>';
+      s += '<text class="ax" x="' + (ml - 8) + '" y="' + (y(t) + 4) + '" text-anchor="end">' + parseFloat(t.toFixed(3)) + '</text>';
+    }
+    var bw = iw / (hi - lo + 1), gap = bw > 6 ? 1.5 : 0;
+    for (i = lo; i <= hi; i++) {
+      var cls = 'b-muted';
+      if (k !== null) {
+        if (mode === 'pmf' && i === k) cls = 'b-mark';
+        if (mode === 'cdf' && i <= k) cls = 'b-acc';
+      }
+      var h = (pm[i] / ymax) * ih;
+      s += '<rect class="' + cls + '" x="' + (ml + (i - lo) * bw + gap / 2).toFixed(2) + '" y="' + (mt + ih - h).toFixed(2) + '" width="' + Math.max(bw - gap, 0.6).toFixed(2) + '" height="' + Math.max(h, 0).toFixed(2) + '"/>';
+    }
+    s += '<line class="base-line" x1="' + ml + '" x2="' + (W - mr) + '" y1="' + (mt + ih) + '" y2="' + (mt + ih) + '"/>';
+    var nice = [1, 2, 5, 10, 20, 25, 50, 100, 200], raw = Math.ceil(30 / bw), sx = nice[nice.length - 1];
+    for (i = 0; i < nice.length; i++) { if (nice[i] >= raw) { sx = nice[i]; break; } }
+    for (i = lo; i <= hi; i++) {
+      if (i % sx !== 0) continue;
+      s += '<text class="ax" x="' + (ml + (i - lo + 0.5) * bw).toFixed(2) + '" y="' + (mt + ih + 16) + '" text-anchor="middle">' + i + '</text>';
+    }
+    s += '<text class="ax" x="' + (ml + iw / 2) + '" y="' + (H - 6) + '" text-anchor="middle">Number of successes k</text>';
+    s += '<text class="ax" transform="translate(12 ' + (mt + ih / 2) + ') rotate(-90)" text-anchor="middle">P(X = k)</text>';
+    s += '</svg>';
+    host.innerHTML = s;
+  }
+  function renderCharts() {
+    var a = $('chart-pmf'), b = $('chart-cdf');
+    if (!cur.ok) { a.innerHTML = ''; b.innerHTML = ''; }
+    else {
+      var fb = function (i) { return pmfAt(cur.n, cur.p, i); };
+      var lb = 'Bar chart of P(X = k) for Binomial(' + cur.n + ', ' + fmt(cur.p, 4) + ')';
+      drawChart(a, 0, cur.n, fb, 'pmf', cur.kp, lb);
+      drawChart(b, 0, cur.n, fb, 'cdf', cur.kc, lb);
+    }
+    if (!MODS) return;
+    Object.keys(MODS).forEach(function (key) {
+      var o = MODS[key], st = o.st, pa = $(o.id + '-chart-pmf'), pb = $(o.id + '-chart-cdf');
+      if (!pa || !pb) return;
+      if (!st.ok) { pa.innerHTML = ''; pb.innerHTML = ''; return; }
+      var rg = o.range(st.x), fn = function (i) { return o.pmf(st.x, i); };
+      var lab = 'Bar chart of P(X = k) for ' + o.dist(st.x);
+      drawChart(pa, rg[0], rg[1], fn, 'pmf', st.kp, lab);
+      drawChart(pb, rg[0], rg[1], fn, 'cdf', st.kc, lab);
+    });
+  }
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function () { renderCharts(); });
+    ro.observe($('chart-pmf'));
+    ro.observe($('chart-cdf'));
+  } else {
+    window.addEventListener('resize', renderCharts);
+  }
+
+  /* ---------- Binomial update ---------- */
+  function update() {
+    var rn = parseN($('n').value), rp = parseP($('p').value);
+    setMsg('n-msg', 'n', rn.err, 'A whole number from 1 to ' + MAXN + '.');
+    setMsg('p-msg', 'p', rp.err, 'A number from 0 to 1.');
+    var ok = !rn.err && !rp.err;
+    var n = ok ? rn.val : 0, p = ok ? rp.val : 0;
+
+    $('sel-n').textContent = rn.err ? '—' : String(rn.val);
+    $('sel-p').textContent = rp.err ? '—' : fmt(rp.val, 6);
+    $('sel-d').textContent = ok ? 'X ~ Binomial(' + n + ', ' + fmt(p, 6) + ')' : '—';
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-blocked]'), function (el) { el.hidden = ok; });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-body]'), function (el) { el.hidden = !ok; });
+
+    cur.ok = ok; cur.n = n; cur.p = p; cur.kp = null; cur.kc = null;
+    var kHint = 'A whole number from 0 to ' + (ok ? n : 'n') + '.';
+
+    if (!ok) {
+      setMsg('kp-msg', 'k-pmf', null, kHint);
+      setMsg('kc-msg', 'k-cdf', null, kHint);
+      renderCharts();
+      return;
+    }
+
+    /* Statistics */
+    var mean = n * p, variance = n * p * (1 - p), sd = Math.sqrt(variance), second = variance + mean * mean;
+    var skewDefined = variance > 0;
+    var skew = skewDefined ? (1 - 2 * p) / Math.sqrt(variance) : NaN;
+    var cards = [
+      { k: 'Mean', v: fmt(mean), f: 'E[X] = np', s: n + ' × ' + fmt(p, 6) },
+      { k: 'Variance', v: fmt(variance), f: 'Var(X) = np(1 − p)', s: n + ' × ' + fmt(p, 6) + ' × ' + fmt(1 - p, 6) },
+      { k: 'Standard deviation', v: fmt(sd), f: 'σ = √Var(X)', s: '√' + fmt(variance) },
+      { k: 'Second moment', v: fmt(second), f: 'E[X²] = Variance + Mean²', s: fmt(variance) + ' + ' + fmt(mean) + '²' },
+      { k: 'Skewness', v: skewDefined ? fmt(skew) : 'Undefined', f: '(1 − 2p) / √(np(1 − p))', s: skewDefined ? fmt(1 - 2 * p, 6) + ' / √' + fmt(variance) : 'Variance is 0' }
+    ];
+    $('stats').innerHTML = cards.map(function (c) {
+      return '<div class="stat"><div class="k">' + c.k + '</div><div class="v">' + c.v + '</div><div class="f">' + c.f + '</div><div class="s">' + c.s + '</div></div>';
+    }).join('');
+
+    var chk = $('checks');
+    if (n === 20 && p === 0.35) {
+      var okM = Math.abs(mean - 7) < 1e-9, okV = Math.abs(variance - 4.55) < 1e-9;
+      chk.hidden = false;
+      chk.innerHTML = '<span>Check for n = 20, p = 0.35:</span>' +
+        '<span class="pill' + (okM ? '' : ' fail') + '">' + (okM ? '✓' : '✗') + ' mean = 7</span>' +
+        '<span class="pill' + (okV ? '' : ' fail') + '">' + (okV ? '✓' : '✗') + ' variance = 4.55</span>';
+    } else { chk.hidden = true; chk.innerHTML = ''; }
+
+    /* PMF */
+    var rk = parseK($('k-pmf').value, n);
+    setMsg('kp-msg', 'k-pmf', rk.err, kHint);
+    $('pmf-res').hidden = !!rk.err;
+    $('pmf-math').hidden = !!rk.err;
+    $('pmf-explain').hidden = !!rk.err;
+    var pl = $('pmf-legend');
+    if (!rk.err) {
+      var k = rk.val, pv = pmfAt(n, p, k), c = choose(n, k);
+      cur.kp = k;
+      $('pmf-cap').textContent = 'P(X = ' + k + ')';
+      $('pmf-val').textContent = fmtProb(pv);
+      $('pmf-pct').textContent = '≈ ' + fmtPct(pv);
+      $('pmf-math').innerHTML =
+        '<div class="cap">Formula</div>' +
+        '<div class="ml">P(X = k) = C(n, k) · p<sup>k</sup> · (1 − p)<sup>n − k</sup></div>' +
+        '<div class="cap">With your values</div>' +
+        '<div class="ml">P(X = ' + k + ') = C(' + n + ', ' + k + ') · ' + fmt(p, 6) + '<sup>' + k + '</sup> · ' + fmt(1 - p, 6) + '<sup>' + (n - k) + '</sup></div>' +
+        '<div class="ml dim">C(' + n + ', ' + k + ') = ' + fmtBig(c) + '</div>' +
+        '<div class="ml">P(X = ' + k + ') = ' + fmtProb(pv) + '</div>';
+      $('pmf-explain').innerHTML = '<span class="tag">Meaning</span>Out of ' + n + ' trials, there is a ' + fmtPct(pv) + ' chance of getting exactly ' + k + ' success' + (k === 1 ? '' : 'es') + '.';
+      pl.innerHTML = '<span><i class="sw-mark"></i>k = ' + k + '</span><span><i class="sw-muted"></i>other values of k</span>';
+    } else {
+      pl.innerHTML = '<span><i class="sw-muted"></i>P(X = k) for every k from 0 to ' + n + '</span>';
+    }
+
+    /* CDF */
+    var rc = parseK($('k-cdf').value, n);
+    setMsg('kc-msg', 'k-cdf', rc.err, kHint);
+    $('cdf-res').hidden = !!rc.err;
+    $('cdf-explain').hidden = false;
+    var cl = $('cdf-legend');
+    if (!rc.err) {
+      var kk = rc.val, cdf = 0, i;
+      for (i = 0; i <= kk; i++) cdf += pmfAt(n, p, i);
+      if (cdf > 1) cdf = 1;
+      var up = Math.max(0, 1 - cdf);
+      if (up < 1e-9) { up = 0; for (i = kk + 1; i <= n; i++) up += pmfAt(n, p, i); }
+      cur.kc = kk;
+      $('cdf-cap').textContent = 'P(X ≤ ' + kk + ')';
+      $('cdf-val').textContent = fmtProb(cdf);
+      $('cdf-pct').textContent = '≈ ' + fmtPct(cdf);
+      $('up-cap').textContent = 'P(X > ' + kk + ')';
+      $('up-val').textContent = fmtProb(up);
+      $('up-pct').textContent = '≈ ' + fmtPct(up);
+      $('cdf-bar').style.width = (cdf * 100).toFixed(2) + '%';
+      $('cdf-math').innerHTML =
+        '<div class="ml">P(X ≤ ' + kk + ') = P(0) + P(1) + … + P(' + kk + ') = ' + fmtProb(cdf) + '</div>' +
+        '<div class="ml">P(X &gt; ' + kk + ') = 1 − P(X ≤ ' + kk + ') = 1 − ' + fmtProb(cdf) + ' = ' + fmtProb(up) + '</div>';
+      cl.innerHTML = '<span><i class="sw-acc"></i>k ≤ ' + kk + '</span><span><i class="sw-muted"></i>k &gt; ' + kk + '</span>';
+    } else {
+      cl.innerHTML = '<span><i class="sw-muted"></i>P(X = k) for every k from 0 to ' + n + '</span>';
+    }
+    renderCharts();
+  }
+
+  /* ---------- Poisson and Geometric ---------- */
+  function factBig(k) { var r = 1n; for (var i = 2; i <= k; i++) r *= BigInt(i); return r; }
+  function poiPmf(lam, k) { return Math.exp(-lam + k * Math.log(lam) - lnFact(k)); }
+  function geoPmf(p, k) { return Math.pow(1 - p, k - 1) * p; }
+  function statCard(k, v, f, s) { return { k: k, v: v, f: f, s: s }; }
+
+  MODS = {
+    poisson: {
+      id: 'po', title: 'Poisson Distribution', paramName: 'λ',
+      lead: 'X counts events in a fixed interval when they occur at an average rate λ. X can be 0, 1, 2, ….',
+      panelLead: 'Change λ and every result below updates.',
+      label: 'Average rate, <span class="sym">λ</span>', min: 0.01, def: 4,
+      hint: 'A number from 0.01 to 100.', selLabel: 'Average rate',
+      pmfTitle: 'probability of exactly k events', cdfTitle: 'probability of k or fewer events',
+      kmin: 0, kmax: 1000, kdef: 4, kHint: 'A whole number from 0 to 1000.',
+      cdfMeaning: 'P(X ≤ k) means the probability of getting k or fewer events.',
+      upMeaning: 'P(X &gt; k) is the probability of getting more than k events.',
+      parse: function (v) {
+        if (v.trim() === '') return { err: 'Enter the average rate λ.' };
+        var x = Number(v);
+        if (!isFinite(x) || x < 0.01 || x > 100) return { err: 'λ must be a number between 0.01 and 100.' };
+        return { val: x };
+      },
+      dist: function (x) { return 'X ~ Poisson(' + fmt(x, 6) + ')'; },
+      range: function (x) { return [0, Math.min(1000, Math.ceil(x + 5 * Math.sqrt(x) + 10))]; },
+      pmf: poiPmf,
+      cdfUp: function (x, k) {
+        var c = 0, i;
+        for (i = 0; i <= k; i++) c += poiPmf(x, i);
+        if (c > 1) c = 1;
+        var u = Math.max(0, 1 - c);
+        if (u < 1e-9) {
+          u = 0;
+          for (i = k + 1; i <= k + 3000; i++) { var t = poiPmf(x, i); u += t; if (t < 1e-20 && i > x) break; }
+        }
+        return { cdf: c, up: u };
+      },
+      cards: function (x) {
+        var variance = x, second = variance + x * x;
+        return [
+          statCard('Mean', fmt(x), 'E[X] = λ', 'λ = ' + fmt(x, 6)),
+          statCard('Variance', fmt(variance), 'Var(X) = λ', 'λ = ' + fmt(x, 6)),
+          statCard('Standard deviation', fmt(Math.sqrt(x)), 'σ = √Var(X)', '√' + fmt(variance)),
+          statCard('Second moment', fmt(second), 'E[X²] = Variance + Mean²', fmt(variance) + ' + ' + fmt(x) + '²'),
+          statCard('Skewness', fmt(1 / Math.sqrt(x)), '1 / √λ', '1 / √' + fmt(x, 6))
+        ];
+      },
+      pmfMath: function (x, k, pv) {
+        return '<div class="cap">Formula</div><div class="ml">P(X = k) = e<sup>−λ</sup> · λ<sup>k</sup> / k!</div>' +
+          '<div class="cap">With your values</div><div class="ml">P(X = ' + k + ') = e<sup>−' + fmt(x, 6) + '</sup> · ' + fmt(x, 6) + '<sup>' + k + '</sup> / ' + k + '!</div>' +
+          '<div class="ml dim">' + k + '! = ' + fmtBig(factBig(k)) + '</div>' +
+          '<div class="ml">P(X = ' + k + ') = ' + fmtProb(pv) + '</div>';
+      },
+      pmfExplain: function (x, k, pv) {
+        return 'In an interval with an average of ' + fmt(x, 6) + ' events, there is a ' + fmtPct(pv) + ' chance of seeing exactly ' + k + ' event' + (k === 1 ? '' : 's') + '.';
+      },
+      cdfMath: function (x, k, c, u) {
+        return '<div class="ml">P(X ≤ ' + k + ') = P(0) + P(1) + … + P(' + k + ') = ' + fmtProb(c) + '</div>' +
+          '<div class="ml">P(X &gt; ' + k + ') = 1 − P(X ≤ ' + k + ') = 1 − ' + fmtProb(c) + ' = ' + fmtProb(u) + '</div>';
+      }
+    },
+    geometric: {
+      id: 'ge', title: 'Geometric Distribution', paramName: 'p',
+      lead: 'X counts the trials needed to get the first success, where each trial succeeds with probability p. X can be 1, 2, 3, ….',
+      panelLead: 'Change p and every result below updates.',
+      label: 'Probability of success, <span class="sym">p</span>', min: 0.001, def: 0.3,
+      hint: 'A number from 0.001 to 1.', selLabel: 'Success probability',
+      pmfTitle: 'first success on trial k', cdfTitle: 'first success on trial k or earlier',
+      kmin: 1, kmax: 10000, kdef: 3, kHint: 'A whole number from 1 to 10000.',
+      cdfMeaning: 'P(X ≤ k) means the probability that the first success comes on trial k or earlier.',
+      upMeaning: 'P(X &gt; k) is the probability that the first k trials all fail, so you need more than k trials.',
+      parse: function (v) {
+        if (v.trim() === '') return { err: 'Enter the probability p.' };
+        var x = Number(v);
+        if (!isFinite(x) || x < 0.001 || x > 1) return { err: 'p must be a number between 0.001 and 1.' };
+        return { val: x };
+      },
+      dist: function (x) { return 'X ~ Geometric(' + fmt(x, 6) + ')'; },
+      range: function (x) {
+        if (x >= 1) return [1, 10];
+        var h = Math.ceil(Math.log(0.001) / Math.log(1 - x));
+        return [1, Math.max(10, Math.min(100, h))];
+      },
+      pmf: geoPmf,
+      cdfUp: function (x, k) {
+        var u = Math.exp(k * Math.log1p(-x));
+        var c = -Math.expm1(k * Math.log1p(-x));
+        if (x >= 1) { u = 0; c = 1; }
+        return { cdf: c, up: u };
+      },
+      cards: function (x) {
+        var mean = 1 / x, variance = (1 - x) / (x * x), second = variance + mean * mean;
+        var skewOk = x < 1;
+        return [
+          statCard('Mean', fmt(mean), 'E[X] = 1 / p', '1 / ' + fmt(x, 6)),
+          statCard('Variance', fmt(variance), 'Var(X) = (1 − p) / p²', fmt(1 - x, 6) + ' / ' + fmt(x, 6) + '²'),
+          statCard('Standard deviation', fmt(Math.sqrt(variance)), 'σ = √Var(X)', '√' + fmt(variance)),
+          statCard('Second moment', fmt(second), 'E[X²] = Variance + Mean²', fmt(variance) + ' + ' + fmt(mean) + '²'),
+          statCard('Skewness', skewOk ? fmt((2 - x) / Math.sqrt(1 - x)) : 'Undefined', '(2 − p) / √(1 − p)', skewOk ? fmt(2 - x, 6) + ' / √' + fmt(1 - x, 6) : 'Variance is 0')
+        ];
+      },
+      pmfMath: function (x, k, pv) {
+        return '<div class="cap">Formula</div><div class="ml">P(X = k) = (1 − p)<sup>k − 1</sup> · p</div>' +
+          '<div class="cap">With your values</div><div class="ml">P(X = ' + k + ') = ' + fmt(1 - x, 6) + '<sup>' + (k - 1) + '</sup> · ' + fmt(x, 6) + '</div>' +
+          '<div class="ml">P(X = ' + k + ') = ' + fmtProb(pv) + '</div>';
+      },
+      pmfExplain: function (x, k, pv) {
+        return 'There is a ' + fmtPct(pv) + ' chance that the first success happens exactly on trial ' + k + '.';
+      },
+      cdfMath: function (x, k, c, u) {
+        return '<div class="ml">P(X ≤ ' + k + ') = 1 − (1 − p)<sup>k</sup> = 1 − ' + fmt(1 - x, 6) + '<sup>' + k + '</sup> = ' + fmtProb(c) + '</div>' +
+          '<div class="ml">P(X &gt; ' + k + ') = (1 − p)<sup>k</sup> = 1 − P(X ≤ ' + k + ') = ' + fmtProb(u) + '</div>';
+      }
+    }
+  };
+
+  function pageHTML(o) {
+    var id = o.id;
+    var blocked = '<p class="blocked" data-blocked>Enter a valid ' + o.paramName + ' above to see this section.</p>';
+    var kField = function (suffix) {
+      return '<div><label class="lbl" for="' + id + '-' + suffix + '">Value of <span class="sym">k</span></label>' +
+        '<input id="' + id + '-' + suffix + '" type="number" inputmode="numeric" step="1" min="' + o.kmin + '" value="' + o.kdef + '" autocomplete="off">' +
+        '<p class="msg" id="' + id + '-' + suffix + '-msg"></p></div>';
+    };
+    return '<p class="eyebrow">Module</p><h1>' + o.title + '</h1><p class="lead">' + o.lead + '</p>' +
+      '<div class="stack">' +
+      '<div class="panel"><h2>Parameters</h2><p class="panel-lead">' + o.panelLead + '</p>' +
+        '<div class="fields"><div><label class="lbl" for="' + id + '-x">' + o.label + '</label>' +
+        '<input id="' + id + '-x" type="number" inputmode="decimal" step="any" min="' + o.min + '" value="' + o.def + '" autocomplete="off">' +
+        '<p class="msg" id="' + id + '-x-msg"></p></div></div>' +
+        '<div class="selected" aria-live="polite">' +
+        '<div class="item"><div class="k">' + o.selLabel + '</div><div class="v" id="' + id + '-sel-x"></div></div>' +
+        '<div class="item"><div class="k">Distribution</div><div class="v" id="' + id + '-sel-d"></div></div></div></div>' +
+      '<div class="panel"><h2>Summary statistics</h2>' + blocked + '<div data-body><div class="stats" id="' + id + '-stats"></div></div></div>' +
+      '<div class="panel"><h2>PMF: ' + o.pmfTitle + '</h2><p class="panel-lead">The probability mass function gives P(X = k) for one value of k.</p>' + blocked +
+        '<div data-body><div class="split"><div class="col">' + kField('kp') +
+        '<div class="result" id="' + id + '-pmf-res"><div class="cap" id="' + id + '-pmf-cap"></div><div class="big" id="' + id + '-pmf-val"></div><div class="sub" id="' + id + '-pmf-pct"></div></div></div>' +
+        '<div class="math" id="' + id + '-pmf-math"></div></div>' +
+        '<p class="note explain" id="' + id + '-pmf-explain"></p>' +
+        '<div class="chart"><div class="legend" id="' + id + '-pmf-legend"></div><div class="chart-host" id="' + id + '-chart-pmf"></div></div></div></div>' +
+      '<div class="panel"><h2>CDF: ' + o.cdfTitle + '</h2><p class="panel-lead">The cumulative distribution function adds up the PMF from the smallest value up to k.</p>' + blocked +
+        '<div data-body><div class="split"><div class="col">' + kField('kc') + '</div>' +
+        '<div id="' + id + '-cdf-res"><div class="two">' +
+        '<div class="tile result"><div class="cap" id="' + id + '-cdf-cap"></div><div class="big" id="' + id + '-cdf-val"></div><div class="sub" id="' + id + '-cdf-pct"></div></div>' +
+        '<div class="tile result"><div class="cap" id="' + id + '-up-cap"></div><div class="big" id="' + id + '-up-val"></div><div class="sub" id="' + id + '-up-pct"></div></div></div>' +
+        '<div class="splitbar" aria-hidden="true"><i id="' + id + '-cdf-bar" style="width:0%"></i></div>' +
+        '<div class="math" id="' + id + '-cdf-math" style="margin-top:14px"></div></div></div>' +
+        '<div class="explain note"><p class="note"><span class="tag">Meaning</span>' + o.cdfMeaning + '</p><p class="note"><span class="tag">Meaning</span>' + o.upMeaning + '</p></div>' +
+        '<div class="chart"><div class="legend" id="' + id + '-cdf-legend"></div><div class="chart-host" id="' + id + '-chart-cdf"></div></div></div></div>' +
+      '</div>';
+  }
+
+  function parseKm(v, o) {
+    if (v.trim() === '') return { err: 'Enter k.' };
+    var x = Number(v);
+    if (!isFinite(x) || x % 1 !== 0 || x < o.kmin || x > o.kmax) return { err: 'k must be a whole number from ' + o.kmin + ' to ' + o.kmax + '.' };
+    return { val: x };
+  }
+
+  function updateMod(o) {
+    var id = o.id, page = $('page-' + o.key), st = o.st;
+    var r = o.parse($(id + '-x').value);
+    setMsg(id + '-x-msg', id + '-x', r.err, o.hint);
+    var ok = !r.err, x = ok ? r.val : 0;
+    $(id + '-sel-x').textContent = ok ? fmt(x, 6) : '—';
+    $(id + '-sel-d').textContent = ok ? o.dist(x) : '—';
+    Array.prototype.forEach.call(page.querySelectorAll('[data-blocked]'), function (el) { el.hidden = ok; });
+    Array.prototype.forEach.call(page.querySelectorAll('[data-body]'), function (el) { el.hidden = !ok; });
+    st.ok = ok; st.x = x; st.kp = null; st.kc = null;
+    if (!ok) {
+      setMsg(id + '-kp-msg', id + '-kp', null, o.kHint);
+      setMsg(id + '-kc-msg', id + '-kc', null, o.kHint);
+      renderCharts();
+      return;
+    }
+    $(id + '-stats').innerHTML = o.cards(x).map(function (c) {
+      return '<div class="stat"><div class="k">' + c.k + '</div><div class="v">' + c.v + '</div><div class="f">' + c.f + '</div><div class="s">' + c.s + '</div></div>';
+    }).join('');
+    var rg = o.range(x);
+
+    /* PMF */
+    var rk = parseKm($(id + '-kp').value, o);
+    setMsg(id + '-kp-msg', id + '-kp', rk.err, o.kHint);
+    $(id + '-pmf-res').hidden = !!rk.err;
+    $(id + '-pmf-math').hidden = !!rk.err;
+    $(id + '-pmf-explain').hidden = !!rk.err;
+    var pl = $(id + '-pmf-legend');
+    if (!rk.err) {
+      var k = rk.val, pv = o.pmf(x, k);
+      st.kp = k;
+      $(id + '-pmf-cap').textContent = 'P(X = ' + k + ')';
+      $(id + '-pmf-val').textContent = fmtProb(pv);
+      $(id + '-pmf-pct').textContent = '≈ ' + fmtPct(pv);
+      $(id + '-pmf-math').innerHTML = o.pmfMath(x, k, pv);
+      $(id + '-pmf-explain').innerHTML = '<span class="tag">Meaning</span>' + o.pmfExplain(x, k, pv);
+      pl.innerHTML = '<span><i class="sw-mark"></i>k = ' + k + '</span><span><i class="sw-muted"></i>other values of k</span>' +
+        (k > rg[1] ? '<span>k = ' + k + ' is past the right edge of the chart</span>' : '');
+    } else {
+      pl.innerHTML = '<span><i class="sw-muted"></i>P(X = k) for each value of k shown</span>';
+    }
+
+    /* CDF */
+    var rc = parseKm($(id + '-kc').value, o);
+    setMsg(id + '-kc-msg', id + '-kc', rc.err, o.kHint);
+    $(id + '-cdf-res').hidden = !!rc.err;
+    var cl = $(id + '-cdf-legend');
+    if (!rc.err) {
+      var kk = rc.val, res = o.cdfUp(x, kk);
+      st.kc = kk;
+      $(id + '-cdf-cap').textContent = 'P(X ≤ ' + kk + ')';
+      $(id + '-cdf-val').textContent = fmtProb(res.cdf);
+      $(id + '-cdf-pct').textContent = '≈ ' + fmtPct(res.cdf);
+      $(id + '-up-cap').textContent = 'P(X > ' + kk + ')';
+      $(id + '-up-val').textContent = fmtProb(res.up);
+      $(id + '-up-pct').textContent = '≈ ' + fmtPct(res.up);
+      $(id + '-cdf-bar').style.width = (res.cdf * 100).toFixed(2) + '%';
+      $(id + '-cdf-math').innerHTML = o.cdfMath(x, kk, res.cdf, res.up);
+      cl.innerHTML = '<span><i class="sw-acc"></i>k ≤ ' + kk + '</span><span><i class="sw-muted"></i>k &gt; ' + kk + '</span>' +
+        (kk > rg[1] ? '<span>The chart ends before k = ' + kk + '</span>' : '');
+    } else {
+      cl.innerHTML = '<span><i class="sw-muted"></i>P(X = k) for each value of k shown</span>';
+    }
+    renderCharts();
+  }
+
+  Object.keys(MODS).forEach(function (key) {
+    var o = MODS[key];
+    o.key = key;
+    o.st = { ok: false, x: 0, kp: null, kc: null };
+    $('page-' + key).innerHTML = pageHTML(o);
+    var cb = function () { updateMod(o); };
+    [o.id + '-x', o.id + '-kp', o.id + '-kc'].forEach(function (i) { $(i).addEventListener('input', cb); });
+    if (ro) { ro.observe($(o.id + '-chart-pmf')); ro.observe($(o.id + '-chart-cdf')); }
+  });
+
+  ['n', 'p', 'k-pmf', 'k-cdf'].forEach(function (id) { $(id).addEventListener('input', update); });
+
+  update();
+  Object.keys(MODS).forEach(function (key) { updateMod(MODS[key]); });
+  show(location.hash.replace('#', ''));
+})();
+</script>
+
+</body></html>
